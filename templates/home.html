@@ -38,7 +38,8 @@ $code:
 <script>
     var priorRs = ${gv.sd[u"rs"]};
     var useRainsense = ${gv.sd[u"urs"]};
-    var devt = ${gv.now}
+    var devt = ${gv.now};
+    let pluginStn = $:{json.dumps(gv.pluginStn, ensure_ascii=False)};
     
     function formatLogline(log) {
         var lrsid = lrun[0], lrpid = lrun[1], lrdur = lrun[2], lret = lrun[3];
@@ -69,6 +70,15 @@ $code:
                     if (seconds < 10) {seconds = "0"+seconds;}
                     if (station.status == "on") {
                         display = minutes+":"+seconds;
+                          if (typeof pluginStn !== 'undefined' && pluginStn.length) {
+//                         	console.log("pluginStn pre: ", pluginStn)
+//                         	pluginStn =  pluginStn.filter(function(e){return e.length});
+//                         	console.log("pluginStn filtered: ", pluginStn)
+                        	pluginStn.forEach(
+                        	function(item) {
+                        		display = display + ", " +  item[0] + ": " + item[1];
+                        	});
+                        }
                     } else {
                         display = "(" + minutes+":"+seconds + ")";
                     }
@@ -99,11 +109,17 @@ $code:
         }
         setTimeout(statusTimer,updateInterval);
         if (updateInterval > 1000) {
-
             displayProgram();
         }
     }
+    
+    function showData(data) { // -test
+    	console.log("data: ", data)
+    }
+    
     function statusTimer() {
+        // Add call to get plugin data
+//        jQuery.getJSON(baseUrl + "/api/plugins", showData)
         jQuery.getJSON(baseUrl + "/api/status", updateStatus)
     }
 
@@ -220,11 +236,11 @@ $code:
         var timerValue = parseFloat(timerElement.attr("data"));
         var remaining = timerValue - devt; //Date.now(); // DK change
         var rHours = Math.floor(remaining / 3600000);
-        var rMinutes = Math.floor((remaining%3600000) / 60000);
-        if (rHours <=0 && rMinutes <=0) {
+        var rMinutes = Math.floor((remaining % 3600000) / 60000);
+        if (rHours <= 0 && rMinutes <= 0) {
             window.location = baseUrl + "/";
         } else {
-            timerElement.text((rHours<10 ? "0" : "") + rHours + ":" + (rMinutes<10 ? "0" : "") + rMinutes);
+            timerElement.text((rHours < 10 ? "0" : "") + rHours + ":" + (rMinutes<10 ? "0" : "") + rMinutes);
             setTimeout("countdownTimer('" + timerId + "')", 2000);
         }
     }
@@ -250,7 +266,7 @@ $if gv.sd[u'mm']:
         $# Manual program control formatting
         $for bid in range(0, gv.sd[u'nbrd']):
             $for s in range(0,8):
-                $ sid = bid*8 + s;
+                $ sid = bid * 8 + s;
                 $ sn = sid + 1
                 $ sbit = (gv.sbits[bid]>>s)&1
                 $ show = (gv.sd[u'show'][bid]>>s)&1

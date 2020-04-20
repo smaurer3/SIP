@@ -33,8 +33,14 @@ $code:
         jQuery("button#nDeleteAll").click(function(){
             jQuery("form#df").submit();
         });
-    });
-
+         
+        $if gv.logAppend:      	
+            var headers = $:{list(gv.logAppend.keys())};  
+            headers.forEach(function(item) {
+                jQuery("#logHead").append('<th>' + item + '</th>');
+            });
+            
+    }); 
 </script>
 
 <div id="options">
@@ -47,7 +53,7 @@ $code:
     <p>$_(u'Download log as ')<a href="$app_path('/wl')">csv</a>.</p>
 
     <table class="logList">
-        <tr class="log_rec">
+        <tr class="log_rec" id=logHead>
             <th>$_(u'Date')</th>
             <th>$_(u'Start Time')</th>
             <th>$_(u'Station')</th>
@@ -55,14 +61,17 @@ $code:
             <th>$_(u'Program')</th>
         </tr>
         $ odd = 1
+        $ fields = ["date", "start", "station", "duration", "program"]
+        $if gv.logAppend:
+        	${fields.extend(list(gv.logAppend.keys()))}
         $for r in records:
-            $ event = r #  ast.literal_eval(json.loads(r))
-            <tr class="log_rec ${'odd' if odd else 'even'}">
-                <td align='center'>${event["date"]}</td>
-                <td align='center'>${formatTime(event["start"])}</td>
-                <td align='center'>${snames[event["station"]]}</td>
-                <td align='center'>${event["duration"]}</td>
-                <td align='center'>${event["program"]}</td>
+            $ event = r 
+            <tr class="log_rec ${'odd' if odd else 'even'}" name="logLst">
+            $for f in fields:
+            	$if f == "station":
+            		<td align='center'>${snames[event["station"]]}</td>
+            	$elif f in event:	
+                	<td align='center'>${event[f]}</td>
             </tr>
             $ odd = 1 - odd
     </table>

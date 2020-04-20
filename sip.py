@@ -117,10 +117,10 @@ def timing_loop():
                                 gv.lrun[0] = sid
                                 gv.lrun[1] = gv.rs[sid][3]
                                 gv.lrun[2] = int(gv.now - gv.rs[sid][0])
-                                gv.lrun[3] = gv.now #  test
-                                print(u"logging @ time check")
-                                log_run()
+                                gv.lrun[3] = gv.now
+                                print(u"logging @ time check")  # - test
                                 report_station_completed(sid + 1)
+                                log_run()                                
                                 gv.pon = None  # Program has ended
                             gv.rs[sid] = [0, 0, 0, 0]
                     else:  # if this station is not yet on
@@ -223,6 +223,7 @@ app = SIPApp(urls, globals())
 #  disableShiftRegisterOutput()
 web.config.debug = False  # Improves page load speed
 web.config._session = web.session.Session(
+#     app, web.session.MemoryStore(u"sessions"), initializer={u"user": u"anonymous"}
     app, web.session.DiskStore(u"sessions"), initializer={u"user": u"anonymous"}
 )
 template_globals = {

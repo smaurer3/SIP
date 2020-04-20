@@ -7,6 +7,7 @@ from six.moves import range
 
 # standard library imports
 from calendar import timegm
+from collections import OrderedDict
 import json
 import subprocess
 from threading import RLock
@@ -116,8 +117,9 @@ rovals = [0] * sd[u"nbrd"] * 7  # Run Once durations
 snames = station_names()  # Load station names from file
 pd = load_programs()  # Load program data from file
 plugin_data = {}  # Empty dictionary to hold plugin based global data
-plugFtr = []  # Empty dictionary to hold plugin data for display in footer
-plugStn = []  # Empty dictionary to hold plugin data for display on timeline
+pluginFtr = []  # Empty list of dicts to hold plugin data for display in footer
+pluginStn = []  # Empty list of dicts to hold plugin data for display on timeline
+logAppend = OrderedDict()  # Empty ordered dictionary to hold plugin data for run log
 
 ps = []  # Program schedule (used for UI display)
 for i in range(sd[u"nst"]):

@@ -55,7 +55,7 @@ stations_scheduled = signal(u"stations_scheduled")
 
 def report_stations_scheduled(txt=None):
     """
-    Send blinker signal indicating that stations had been scheduled.
+    Send blinker signal indicating that stations have been scheduled.
     """
     stations_scheduled.send(u"SIP", txt = txt)
 
@@ -349,7 +349,12 @@ def log_run():
             + u'":"'
             + time.strftime(u'%H:%M:%S","' + date + u'":"%Y-%m-%d"', start)
             + u"}"
-        )
+        )       
+        if gv.logAppend:
+            newlog = json.loads(logline)
+            newlog.update(gv.logAppend)
+            logline = json.dumps(newlog)
+            gv.logAppend.update( (k,"") for k in gv.logAppend) #  Clear plugin log data for next run
         lines = []
         lines.append(logline + u"\n")
         log = read_log()

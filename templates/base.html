@@ -84,7 +84,6 @@ $code:
         td.stationName {text-align:left; padding-left:1em;}
         
         .piDatFooter {background-color:white; color:black; font-size:12pt; margin-bottom:10px; padding:0px 4px 0px 4px;}
-        
     </style>
     
     <script src="/static/scripts/jquery-3.4.1.min.js"></script>
@@ -105,6 +104,7 @@ $code:
         var tempunit = "${gv.sd[u'tu']}";
 
         $if content.page != 'login':
+        	
             var snames = $:{json.dumps(gv.snames, ensure_ascii=False)};
             var lrun = ${gv.lrun};
             var rdst = ${gv.sd[u'rdst']}*1000;
@@ -130,16 +130,11 @@ $code:
             jQuery(document).ready(function(){
                 jQuery('#pluginMenu').append('<button class="execute" id="pluginMgr" type="button" onclick="window.location.href=\'' + '/plugins\'">$_(u'Manage Plugins')</button><br/>');
                 $if len(uplugin_menu) > 0:
-                	$for i, plugin in enumerate(uplugin_menu):
-                		
+                	$for i, plugin in enumerate(uplugin_menu):               		
                         jQuery('#pluginMenu').append('<button class="execute" type="button" onclick="window.location.href=\'' + '${plugin[1]}\'">${plugin[0]}</button><br/>');
                 $else:
                     jQuery('#pluginMenu').append('None<br/>');
-                	
-                $if gv.plugFtr:
-                	$for i, d in enumerate(gv.plugFtr):
-                	     jQuery("#plugFtrPars").append( "<p>${gv.plugFtr[i]["label"] + ": " + str(gv.plugFtr[i]["val"])}</p>" );                	
-
+             
                 jQuery("#bPlugins").click(function(e) {
                     var btn = jQuery("#bPlugins");
                     jQuery("#pluginMenu").css({
@@ -153,7 +148,26 @@ $code:
                 jQuery(document).click(function(){
                     jQuery("#pluginMenu").slideUp();
                 });
+                
+                $if gv.pluginFtr:
+                	$for i, d in enumerate(gv.pluginFtr):
+                	    jQuery("#pluginPars").append('<p id="${"piData" + str(i)}"><span name="label">${gv.pluginFtr[i]["label"]}</span><span name="val">${str(gv.pluginFtr[i]["val"])}</span><span name="unit">${gv.pluginFtr[i]["unit"]}</span></p>');
+                    setInterval(dataTimer, 2000);
             });
+            
+             function dataTimer() {
+                // Call to get plugin data
+                jQuery.getJSON(baseUrl + "/api/plugins", function(piVals) {
+                	var parID = 'piData'  + piVals.fdata[0][0] // + '.add(span[name="val"])'
+                	jQuery('p#'+parID ).find('span[name="val"]').text(piVals.fdata[0][1])
+                } 
+                		
+                
+                )}
+            
+/*             function updateFooter(vals) {
+            	console.log(vals)
+            } */
     </script>
     <script src="$app_path('/static/scripts/behaviors.js')"></script>
     <script src="$app_path('/static/scripts/schedule.js')"></script>
@@ -199,9 +213,9 @@ $code:
         </div>
         <div class="footer container">
           $if content.page != u'login':
-              $if (gv.plugFtr):
+              $if (gv.pluginFtr):
                   <div class="row">              
-                      <div class="col-12-xs col-xs-offset-4 piDatFooter" id="plugFtrPars"></div> <!--div for plugin data display -->
+                     <div class="col-12-xs col-xs-offset-4 piDatFooter" id="pluginPars"></div>
                   </div>
               <div class="row">
                   <div class="col-5-xs"></div>
@@ -212,10 +226,10 @@ $code:
           
           <div class="row">
             <div class="col-5-xs"></div>
-              <div class="col-6-xs pull-right">
-            <div class="col-1-xs"></div>              
+              <div class="col-5-xs pull-right">
+
                 <p class="text-xs-right text-nowrap">$_(u'CPU Temp'): <b><span id="heat" style="cursor:pointer" title=$:{json.dumps(_(u'Click to toggle Celsius &lt;&gt; Fahrenheit'), ensure_ascii=False)}></span></b></p>
-            </div>
+              </div>
           </div>     
             
             
